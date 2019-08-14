@@ -1,5 +1,5 @@
 {
-    "name": "braintree/braintreehttp",
+    "name": "paynl/braintreehttp",
     "type": "library",
     "license": "MIT",
     "authors": [
