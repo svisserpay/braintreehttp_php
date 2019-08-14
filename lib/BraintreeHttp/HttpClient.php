@@ -18,7 +18,7 @@ class HttpClient
     /**
      * @var Injector[]
      */
-    public $injectors = [];
+    public $injectors = array();
 
     /**
      * @var Encoder
@@ -35,7 +35,7 @@ class HttpClient
     {
         $this->environment = $environment;
         $this->encoder = new Encoder();
-        $this->curlCls = Curl::class;
+        $this->curlCls = "BraintreeHttp\Curl";
     }
 
     /**
@@ -131,7 +131,7 @@ class HttpClient
 
     private function serializeHeaders($headers)
     {
-        $headerArray = [];
+        $headerArray = array();
         if ($headers) {
             foreach ($headers as $key => $val) {
                 $headerArray[] = $key . ": " . $val;
@@ -140,23 +140,24 @@ class HttpClient
 
         return $headerArray;
     }
-
+    
+    public function parseHeader($curl, $header)
+    {
+        $len = strlen($header);
+    
+        $k = "";
+        $v = "";
+    
+        $this->deserializeHeader($header, $k, $v);
+        $headers[$k] = $v;
+    
+        return $len;
+    }
+    
     private function parseResponse($curl)
     {
-        $headers = [];
-        $curl->setOpt(CURLOPT_HEADERFUNCTION,
-            function($curl, $header) use (&$headers)
-            {
-                $len = strlen($header);
-
-                $k = "";
-                $v = "";
-
-                $this->deserializeHeader($header, $k, $v);
-                $headers[$k] = $v;
-
-                return $len;
-            });
+        $headers = array();
+        $curl->setOpt(CURLOPT_HEADERFUNCTION, array($this, 'parseHeader'));
 
         $responseData = $curl->exec();
         $statusCode = $curl->getInfo(CURLINFO_HTTP_CODE);

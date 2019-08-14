@@ -34,12 +34,12 @@ class Multipart implements Serializer
         $contentTypeHeader = $request->headers["Content-Type"];
         $request->headers["Content-Type"] = "{$contentTypeHeader}; boundary={$boundary}";
 
-        $value_params = [];
-        $file_params = [];
+        $value_params = array();
+        $file_params = array();
 
-        $disallow = ["\0", "\"", "\r", "\n"];
+        $disallow = array("\0", "\"", "\r", "\n");
 
-        $body = [];
+        $body = array();
 
         foreach ($request->body as $k => $v) {
             $k = str_replace($disallow, "_", $k);
@@ -56,7 +56,7 @@ class Multipart implements Serializer
 
         // add boundary for each parameters
         array_walk($body, function (&$part) use ($boundary) {
-            $part = "--{$boundary}" . self::LINEFEED . "{$part}";
+            $part = "--{$boundary}" . Multipart::LINEFEED . "{$part}";
         });
 
         // add final boundary
@@ -78,30 +78,31 @@ class Multipart implements Serializer
 
     private function prepareFormField($partName, $value, $boundary)
     {
-        return implode(self::LINEFEED, [
+        return implode(self::LINEFEED, array(
             "Content-Disposition: form-data; name=\"{$partName}\"",
             "",
             filter_var($value),
-        ]);
+        ));
     }
 
     private function prepareFilePart($partName, $file, $boundary)
     {
         $fileInfo = new finfo(FILEINFO_MIME_TYPE);
-        $filePath = stream_get_meta_data($file)['uri'];
+        $metadata = stream_get_meta_data($file);
+        $filePath = $metadata['uri'];
         $data = file_get_contents($filePath);
         $mimeType = $fileInfo->buffer($data);
 
         $splitFilePath = explode(DIRECTORY_SEPARATOR, $filePath);
         $filePath = end($splitFilePath);
-        $disallow = ["\0", "\"", "\r", "\n"];
+        $disallow = array("\0", "\"", "\r", "\n");
         $filePath = str_replace($disallow, "_", $filePath);
-        return implode(self::LINEFEED, [
+        return implode(self::LINEFEED, array(
             "Content-Disposition: form-data; name=\"{$partName}\"; filename=\"{$filePath}\"",
             "Content-Type: {$mimeType}",
             "",
             $data,
-        ]);
+        ));
     }
 
     private function prepareFormPart($partName, $formPart, $boundary)
@@ -122,12 +123,12 @@ class Multipart implements Serializer
             $partValue = $formPart->getValue();
         }
 
-        $finalPartHeaders = [];
+        $finalPartHeaders = array();
         foreach ($partHeaders as $k => $v) {
             $finalPartHeaders[] = "{$k}: {$v}";
         }
 
-        $body = array_merge([$contentDisposition], $finalPartHeaders, [""], [$partValue]);
+        $body = array_merge(array($contentDisposition), $finalPartHeaders, array(""), array($partValue));
 
         return implode(self::LINEFEED, $body);
     }

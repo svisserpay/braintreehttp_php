@@ -15,7 +15,7 @@ use BraintreeHttp\Serializer\Text;
  */
 class Encoder
 {
-    private $serializers = [];
+    private $serializers = array();
 
     function __construct()
     {
@@ -91,7 +91,7 @@ class Encoder
 
     private function supportedEncodings()
     {
-        $values = [];
+        $values = array();
         /** @var Serializer $serializer */
         foreach ($this->serializers as $serializer) {
             $values[] = $serializer->contentType();

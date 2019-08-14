@@ -37,6 +37,6 @@ class HttpRequest
         $this->path = $path;
         $this->verb = $verb;
         $this->body = NULL;
-        $this->headers = [];
+        $this->headers = array();
     }
 }
