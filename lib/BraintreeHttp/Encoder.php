@@ -25,6 +25,11 @@ class Encoder
         $this->serializers[] = new Form();
     }
 
+    /**
+     * @param HttpRequest $request
+     * @return string
+     * @throws \Exception
+     */
     public function serializeRequest(HttpRequest $request)
     {
         if (!array_key_exists('Content-Type', $request->headers)) {

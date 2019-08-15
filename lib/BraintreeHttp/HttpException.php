@@ -4,15 +4,15 @@ namespace BraintreeHttp;
 
 class HttpException extends IOException
 {
-    /**
-     * @var statusCode
-     */
     public $statusCode;
 
     public $headers;
 
     /**
-     * @param string $response
+     * HttpException constructor.
+     * @param $message
+     * @param $statusCode
+     * @param $headers
      */
     public function __construct($message, $statusCode, $headers)
     {

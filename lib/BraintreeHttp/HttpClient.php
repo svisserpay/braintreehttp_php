@@ -26,6 +26,11 @@ class HttpClient
     public $encoder;
 
     /**
+     * @var array
+     */
+    private static $headers = array();
+
+    /**
      * HttpClient constructor. Pass the environment you wish to make calls to.
      *
      * @param $environment Environment
@@ -35,7 +40,6 @@ class HttpClient
     {
         $this->environment = $environment;
         $this->encoder = new Encoder();
-        $this->curlCls = "BraintreeHttp\Curl";
     }
 
     /**
@@ -54,6 +58,9 @@ class HttpClient
      *
      * @param $httpRequest HttpRequest
      * @return HttpResponse
+     * @throws HttpException
+     * @throws IOException
+     * @throws \Exception
      */
     public function execute(HttpRequest $httpRequest)
     {
@@ -149,14 +156,20 @@ class HttpClient
         $v = "";
     
         $this->deserializeHeader($header, $k, $v);
-        $headers[$k] = $v;
+        self::$headers[$k] = $v;
     
         return $len;
     }
-    
-    private function parseResponse($curl)
+
+    /**
+     * @param $curl
+     * @return HttpResponse
+     * @throws HttpException
+     * @throws \Exception
+     */
+    private function parseResponse(Curl $curl)
     {
-        $headers = array();
+        self::$headers = array();
         $curl->setOpt(CURLOPT_HEADERFUNCTION, array($this, 'parseHeader'));
 
         $responseData = $curl->exec();
@@ -174,16 +187,16 @@ class HttpClient
             $responseBody = NULL;
 
             if (!empty($body)) {
-                $responseBody = $this->encoder->deserializeResponse($body, $headers);
+                $responseBody = $this->encoder->deserializeResponse($body, self::$headers);
             }
 
             return new HttpResponse(
                 $errorCode === 0 ? $statusCode : $errorCode,
                 $responseBody,
-                $headers
+                self::$headers
             );
         } else {
-            throw new HttpException($body, $statusCode, $headers);
+            throw new HttpException($body, $statusCode, self::$headers);
         }
     }
 
