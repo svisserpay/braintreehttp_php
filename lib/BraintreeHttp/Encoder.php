@@ -60,7 +60,8 @@ class Encoder
     public function deserializeResponse($responseBody, $headers)
     {
         if (!array_key_exists('Content-Type', $headers)) {
-            throw new \Exception("HTTP response does not have Content-Type header set");
+            // PayPal won't send Content-Type after 1 march 2020
+            $headers['Content-Type'] = "application/json";
         }
 
         $contentType = $headers['Content-Type'];
