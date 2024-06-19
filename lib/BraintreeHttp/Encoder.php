@@ -57,6 +57,21 @@ class Encoder
         return $serialized;
     }
 
+    private function getHeader(array $headers, string $header)
+    {
+        if (isset($headers[$header])) {
+            return $headers[$header];
+        }
+
+        $header = strtolower($header);
+
+        if (isset($headers[$header])) {
+            return $headers[$header];
+        }
+
+        return null;
+    }
+
     public function deserializeResponse($responseBody, $headers)
     {
         if (!array_key_exists('Content-Type', $headers)) {
@@ -72,7 +87,7 @@ class Encoder
             throw new \Exception(sprintf("Unable to deserialize response with Content-Type: %s. Supported encodings are: %s", $contentType, implode(", ", $this->supportedEncodings())));
         }
 
-        if (array_key_exists("Content-Encoding", $headers) && $headers["Content-Encoding"] === "gzip") {
+        if ($this->getHeader($headers, 'Content-Encoding') === "gzip") {
             $responseBody = gzdecode($responseBody);
         }
 
