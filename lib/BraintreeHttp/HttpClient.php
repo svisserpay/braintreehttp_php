@@ -31,6 +31,11 @@ class HttpClient
     private static $headers = array();
 
     /**
+     * @var Curl
+     */
+    private $curl = null;
+
+    /**
      * HttpClient constructor. Pass the environment you wish to make calls to.
      *
      * @param $environment Environment
@@ -65,7 +70,12 @@ class HttpClient
     public function execute(HttpRequest $httpRequest)
     {
         $requestCpy = clone $httpRequest;
-        $curl = new Curl();
+
+        if ($this->curl === null) {
+            $curl = new Curl();
+        } else {
+            $curl = $this->curl;
+        }
 
         foreach ($this->injectors as $inj) {
             $inj->inject($requestCpy);
